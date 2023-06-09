@@ -1,0 +1,66 @@
+# Load in the data
+from sklearn.datasets import load_breast_cancer
+
+# Load the data
+data = load_breast_cancer()
+
+# Check the type of 'data'
+type(data)
+# Note: it is a Bunch object
+# This basically acts like a dictionary where you can treat the keys like attributes
+
+# Check the keys in 'data'
+data.keys()
+
+# 'data' (the attribute) means the input data
+data.data.shape
+# It has 569 samples, 30 features
+
+# 'targets'
+data.target
+# Note how the targets are just 0s and 1s
+# Normally, when you have K targets, they are labeled 0..K-1
+# Their meaning is not lost
+
+# Check the target names
+data.target_names
+
+# There are also 569 corresponding targets
+data.target.shape
+
+# You can also determine the meaning of each feature
+data.feature_names
+
+# Normally we would put all of our imports at the top
+# But this lets us tell a story
+from sklearn.model_selection import train_test_split
+
+# Split the data into train and test sets
+# This lets us simulate how our model will perform in the future
+X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, test_size=0.33)
+N, D = X_train.shape
+
+# Scale the data
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Now all the fun TensorFlow stuff
+# Build the model
+model = tf.keras.models.Sequential([
+  tf.keras.layers.Input(shape=(30,)),
+  tf.keras.layers.Dense(1, activation='sigmoid')])
+
+# Alternatively, you can do:
+# model = tf.keras.models.Sequential()
+# model.add(tf.keras.layers.Dense(1, input_shape=(D,), activation='sigmoid'))
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+r = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=100)
+
+# Evaluate the model - evaluate() returns loss and accuracy
+print("Train score:", model.evaluate(X_train, y_train))
